@@ -32,28 +32,25 @@ async function submitPost(data: FormData) {
   const stage = data.get('stage') as PostStage
   const media = data.getAll('media') as File[]
 
-  const photo_urls: string[] = []
-  const video_urls: string[] = []
+  const post: NewPost = { title, content, stage }
 
   if (media.length > 0) {
     const photos: File[] = []
     const videos: File[] = []
+    const photo_urls: string[] = []
+    const video_urls: string[] = []
 
-    media.forEach(async (file) => {
+    // Sort files first
+    media.forEach((file) => {
       const { type } = file
-
-      if (type === 'image') {
-        photos.push(file)
-      }
-      if (type === 'video') {
-        videos.push(file)
-      }
+      if (type.includes('image')) photos.push(file)
+      if (type.includes('video')) videos.push(file)
     })
 
     if (photos.length > 0) {
-      photos.forEach(async (photo) => {
-        const filename = `public/${photo.name}`
-
+      // Use Promise.all to wait for all uploads
+      const uploadPromises = photos.map(async (photo) => {
+        const filename = `photos/${photo.name}`
         const { data, error } = await db.storage
           .from('media')
           .upload(filename, photo, {
@@ -63,17 +60,21 @@ async function submitPost(data: FormData) {
 
         if (error) {
           console.error(error)
+          return null
         }
 
-        if (data) {
-          photo_urls.push(data.fullPath)
-        }
+        return data?.fullPath
       })
+
+      // Wait for all uploads to complete
+      const results = await Promise.all(uploadPromises)
+      // Filter out null values and add successful uploads to photo_urls
+      photo_urls.push(...results.filter((url) => url !== null))
     }
 
     if (videos.length > 0) {
       videos.forEach(async (video) => {
-        const filename = `public/${video.name}`
+        const filename = `videos/${video.name}`
 
         const { data, error } = await db.storage
           .from('photos')
@@ -91,9 +92,11 @@ async function submitPost(data: FormData) {
         }
       })
     }
+
+    await storePost({ ...post, video_urls, photo_urls })
   }
 
-  await storePost({ title, content, stage, video_urls, photo_urls })
+  await storePost(post)
   revalidatePath('/', 'page')
 
   return redirect('/')

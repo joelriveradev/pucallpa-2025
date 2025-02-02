@@ -4,6 +4,7 @@ import { formatDateCreated } from '@/lib/utils'
 
 export default async function HomePage() {
   const db = await createClient()
+  const storageUrl = process.env.SUPABASE_STORAGE_URL
 
   const { data: posts, error } = await db
     .from('posts')
@@ -23,8 +24,8 @@ export default async function HomePage() {
   }
 
   return (
-    <main className='w-full h-dvh px-10 py-20 lg:px-20'>
-      <h1 className='text-xl lg:text-2xl font-bold'>
+    <main className='w-full min-h-dvh px-10 py-20 lg:px-20'>
+      <h1 className='text-xl lg:text-2xl font-bold mb-2'>
         Pucallpa Mission 2025 🇵🇪
       </h1>
 
@@ -33,16 +34,33 @@ export default async function HomePage() {
       </p>
 
       <div className='mt-20'>
-        {posts.map(({ id, title, content, created_at }) => {
+        {posts.map(({ id, title, content, created_at, photo_urls }) => {
           return (
-            <Card key={id} className='p-5 bg-neutral-900/30 max-w-lg -ml-5'>
+            <Card
+              key={id}
+              className='p-5 bg-neutral-900/30 max-w-lg -ml-5 mb-7'
+            >
               <h2 className='font-semibold mb-1'>{title}</h2>
 
-              <small className='mb-7 block text-neutral-300'>
+              <small className='mb-7 block text-neutral-300 font-mono'>
                 {formatDateCreated(created_at)}
               </small>
 
-              <p className='antialised text-pretty text-neutral-200'>
+              {photo_urls &&
+                photo_urls.map((url) => {
+                  const src = `${storageUrl}/${url}`
+
+                  return (
+                    <img
+                      key={url}
+                      src={src}
+                      alt={title}
+                      className='w-full h-52 object-cover rounded-lg mb-5'
+                    />
+                  )
+                })}
+
+              <p className='antialised text-pretty text-neutral-300'>
                 {content}
               </p>
             </Card>
