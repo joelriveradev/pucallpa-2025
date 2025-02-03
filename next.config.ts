@@ -1,7 +1,19 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  /* config options here */
-};
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '1gb',
+    },
+  },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'lwukcftbkwhgzrprccnj.supabase.co',
+      },
+    ],
+  },
+}
 
-export default nextConfig;
+export default nextConfig
