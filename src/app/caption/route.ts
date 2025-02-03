@@ -16,7 +16,7 @@ export const maxDuration = 60
 
 export async function POST(request: NextRequest) {
   const db = await createClient()
-  const payload: WebhookPayload = await request.json()
+  const payload = await request.json()
   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
   const prompt = `
@@ -55,8 +55,6 @@ export async function POST(request: NextRequest) {
   })
 
   const caption = choices[0].message.content as string
-
-  console.log({ choices })
 
   const { error: captionError } = await db.from('photo_captions').insert({
     photo_id: payload.record.id,

@@ -12,7 +12,7 @@ import {
 import Image from 'next/image'
 
 interface Props {
-  photos: string[]
+  photos: Array<{ url: string; caption: string }>
 }
 
 export function PhotoCarousel({ photos }: Props) {
@@ -35,7 +35,7 @@ export function PhotoCarousel({ photos }: Props) {
     <div className='w-full mb-7'>
       <Carousel setApi={setApi}>
         <CarouselContent>
-          {photos.map((url) => {
+          {photos.map(({ url, caption }) => {
             return (
               <CarouselItem key={url}>
                 <Image
@@ -46,7 +46,7 @@ export function PhotoCarousel({ photos }: Props) {
                   style={{ width: '100%', height: 'auto' }}
                   placeholder='blur'
                   blurDataURL={url}
-                  alt=''
+                  alt={caption}
                   className='rounded-xl mb-2'
                 />
               </CarouselItem>

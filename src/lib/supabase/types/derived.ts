@@ -12,3 +12,8 @@ export type PostStage = Enums<'stage'>
 
 export type StorageRecord =
   StorageDatabase['storage']['Tables']['objects']['Row']
+
+export interface PhotoCaption {
+  url: string
+  caption: string
+}

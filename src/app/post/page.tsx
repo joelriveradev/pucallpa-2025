@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { ArrowRight, ArrowLeft } from 'lucide-react'
 import { NewPost, PostStage } from '@/lib/supabase/types/derived'
+import { generateCaption } from '@/actions'
 
 import {
   Select,
@@ -35,32 +36,34 @@ async function submitPost(data: FormData) {
   const media = data.getAll('media') as File[]
 
   const post: NewPost = { title, content, stage }
+  const storage = process.env.SUPABASE_STORAGE_URL
 
   if (media.length > 0) {
-    const photo_urls: string[] = []
-
     const uploads = media.map(async (photo) => {
       const filename = `photos/${photo.name}`
 
-      const { data, error } = await db.storage
-        .from('media')
-        .upload(filename, photo, {
-          cacheControl: '3600',
-          upsert: true,
-        })
+      const { data } = await db.storage.from('media').upload(filename, photo, {
+        cacheControl: '3600',
+        upsert: true,
+      })
 
-      if (error) {
-        console.error(error)
-        return null
+      const caption =
+        (await generateCaption(`${storage}/${data?.fullPath}`)) ?? ''
+
+      return {
+        id: data?.id,
+        caption,
+        url: data?.fullPath ?? '',
       }
-
-      return data?.fullPath
     })
 
     const results = await Promise.all(uploads)
-    photo_urls.push(...results.filter((url) => url !== null))
 
-    await storePost({ ...post, photo_urls })
+    await storePost({
+      ...post,
+      photo_urls: results.map(({ url }) => url),
+      photo_captions: results.map((caption) => caption),
+    })
   }
 
   await storePost(post)
