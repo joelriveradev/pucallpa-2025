@@ -1,10 +1,13 @@
 import { redirect } from 'next/navigation'
+import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { ArrowRight, ArrowLeft } from 'lucide-react'
 import { NewPost, PostStage } from '@/lib/supabase/types/derived'
+import { Post } from '@/lib/supabase/types/derived'
+import { sendSMSNotification } from '@/actions'
 
 import {
   Select,
@@ -15,7 +18,35 @@ import {
 } from '@/components/ui/select'
 
 import Link from 'next/link'
-import { revalidatePath } from 'next/cache'
+
+async function sendNotification({ title }: Partial<Post>) {
+  'use server'
+
+  const db = await createClient()
+
+  const { data: subscribers, error } = await db
+    .from('subscribers')
+    .select('name, phone_number')
+
+  if (error) {
+    throw new Error('Failed to fetch subscribers', { cause: error.message })
+  }
+
+  await Promise.all(
+    subscribers.map(async ({ name, phone_number }) => {
+      const message = `
+      Hey ${name}, This is Joel! I just posted a new update.
+      "${title}"
+      Check it out! https://pucallpa-2025.vercel.app/
+    `
+      return await sendSMSNotification(message, phone_number)
+    })
+  ).catch((error) => {
+    throw new Error('Failed to send SMS notifications', {
+      cause: error.message,
+    })
+  })
+}
 
 async function storePost(post: NewPost) {
   'use server'
@@ -37,10 +68,10 @@ async function submitPost(data: FormData) {
   if (media.length > 0) {
     const photos: File[] = []
     const videos: File[] = []
+
     const photo_urls: string[] = []
     const video_urls: string[] = []
 
-    // Sort files first
     media.forEach((file) => {
       const { type } = file
       if (type.includes('image')) photos.push(file)
@@ -48,9 +79,9 @@ async function submitPost(data: FormData) {
     })
 
     if (photos.length > 0) {
-      // Use Promise.all to wait for all uploads
-      const uploadPromises = photos.map(async (photo) => {
+      const photoUploads = photos.map(async (photo) => {
         const filename = `photos/${photo.name}`
+
         const { data, error } = await db.storage
           .from('media')
           .upload(filename, photo, {
@@ -66,18 +97,16 @@ async function submitPost(data: FormData) {
         return data?.fullPath
       })
 
-      // Wait for all uploads to complete
-      const results = await Promise.all(uploadPromises)
-      // Filter out null values and add successful uploads to photo_urls
+      const results = await Promise.all(photoUploads)
       photo_urls.push(...results.filter((url) => url !== null))
     }
 
     if (videos.length > 0) {
-      videos.forEach(async (video) => {
+      const videoUploads = videos.map(async (video) => {
         const filename = `videos/${video.name}`
 
         const { data, error } = await db.storage
-          .from('photos')
+          .from('media')
           .upload(filename, video, {
             cacheControl: '3600',
             upsert: true,
@@ -85,20 +114,22 @@ async function submitPost(data: FormData) {
 
         if (error) {
           console.error(error)
+          return null
         }
 
-        if (data) {
-          video_urls.push(data.fullPath)
-        }
+        return data?.fullPath
       })
+
+      const results = await Promise.all(videoUploads)
+      video_urls.push(...results.filter((url) => url !== null))
     }
 
     await storePost({ ...post, video_urls, photo_urls })
   }
 
   await storePost(post)
+  await sendNotification(post)
   revalidatePath('/', 'page')
-
   return redirect('/')
 }
 
