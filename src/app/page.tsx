@@ -2,12 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { Card } from '@/components/ui/card'
 import { PhotoCarousel } from '@/components/photo-carousel'
 import { formatDateCreated } from '@/lib/utils'
-import { buttonVariants } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
-import { MessageSquare } from 'lucide-react'
 
 import Image from 'next/image'
-import Link from 'next/link'
 
 export default async function HomePage() {
   const db = await createClient()
@@ -39,16 +35,6 @@ export default async function HomePage() {
       <p className='text-muted-foreground'>
         Sharing the love of Christ the people of Pucallpa.
       </p>
-
-      <Link
-        href='/subscribe'
-        prefetch
-        className={cn(
-          buttonVariants({ variant: 'outline', className: 'mt-5' })
-        )}
-      >
-        Subscribe for SMS updates! <MessageSquare size={20} />
-      </Link>
 
       <div className='mt-20'>
         {posts.length === 0 ? (
