@@ -3,6 +3,14 @@
 import { createClient } from '@/lib/supabase/server'
 import { OpenAI } from 'openai'
 import { Twilio } from 'twilio'
+import { NewPost } from '@/lib/supabase/types/derived'
+import { revalidatePath } from 'next/cache'
+
+export async function storePost(post: NewPost) {
+  const db = await createClient()
+  await db.from('posts').insert(post)
+  revalidatePath('/')
+}
 
 export async function sendSMSNotification(message: string, recipient: string) {
   const isDev = process.env.NODE_ENV === 'development'

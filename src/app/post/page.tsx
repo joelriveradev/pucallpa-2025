@@ -1,20 +1,10 @@
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Button } from '@/components/ui/button'
-import { ArrowRight, ArrowLeft } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { NewPost, PostStage } from '@/lib/supabase/types/derived'
 import { generateCaption } from '@/actions'
-
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { Form } from '@/components/form'
 
 import Link from 'next/link'
 
@@ -24,6 +14,7 @@ async function storePost(post: NewPost) {
   'use server'
   const db = await createClient()
   await db.from('posts').insert(post)
+  revalidatePath('/')
 }
 
 async function submitPost(data: FormData) {
@@ -90,45 +81,7 @@ export default async function PostPage() {
           </Link>
         </header>
 
-        <form action={submitPost} className='space-y-5'>
-          <div className='w-full lg:flex items-center space-y-5 lg:space-x-5 lg:space-y-0'>
-            <Input
-              type='text'
-              placeholder="What's the title?"
-              className='p-4 h-10'
-              required
-              name='title'
-            />
-
-            <Select name='stage'>
-              <SelectTrigger className='h-10'>
-                <SelectValue placeholder='Stage' />
-              </SelectTrigger>
-
-              <SelectContent>
-                <SelectItem value='DRAFT'>Draft</SelectItem>
-                <SelectItem value='PUBLISHED'>Publish</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <Input type='file' name='media' accept='image/*, video/*' multiple />
-
-          <Textarea
-            rows={5}
-            placeholder="What's going on?"
-            className='p-4'
-            required
-            name='content'
-          />
-
-          <Button
-            className='w-full mt-5 bg-neutral-900/50 hover:bg-neutral-900/75 p-5'
-            variant='outline'
-          >
-            Post Update <ArrowRight size={16} />
-          </Button>
-        </form>
+        <Form />
       </main>
     </div>
   )

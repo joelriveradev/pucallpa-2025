@@ -2,13 +2,12 @@ import { createClient } from '@/lib/supabase/server'
 import { Card } from '@/components/ui/card'
 import { PhotoCarousel } from '@/components/photo-carousel'
 import { formatDateCreated } from '@/lib/utils'
-import { PhotoCaption } from '@/lib/supabase/types/derived'
 
 import Image from 'next/image'
 
 export default async function HomePage() {
   const db = await createClient()
-  const storageUrl = process.env.SUPABASE_STORAGE_URL
+  const storageUrl = process.env.NEXT_PUBLIC_SUPABASE_STORAGE_URL
 
   const { data: posts, error } = await db
     .from('posts')
