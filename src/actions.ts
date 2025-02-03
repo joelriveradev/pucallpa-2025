@@ -32,7 +32,6 @@ export async function sendSMSNotification(message: string, recipient: string) {
 }
 
 export async function generateCaption(photoUrl: string) {
-  const db = await createClient()
   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
   const prompt = `
