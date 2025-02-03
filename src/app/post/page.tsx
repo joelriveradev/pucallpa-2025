@@ -6,8 +6,6 @@ import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { ArrowRight, ArrowLeft } from 'lucide-react'
 import { NewPost, PostStage } from '@/lib/supabase/types/derived'
-import { Post } from '@/lib/supabase/types/derived'
-import { sendSMSNotification } from '@/actions'
 
 import {
   Select,
@@ -18,35 +16,6 @@ import {
 } from '@/components/ui/select'
 
 import Link from 'next/link'
-
-async function sendNotification({ title }: Partial<Post>) {
-  'use server'
-
-  const db = await createClient()
-
-  const { data: subscribers, error } = await db
-    .from('subscribers')
-    .select('name, phone_number')
-
-  if (error) {
-    throw new Error('Failed to fetch subscribers', { cause: error.message })
-  }
-
-  await Promise.all(
-    subscribers.map(async ({ name, phone_number }) => {
-      const message = `
-      Hey ${name}, This is Joel! I just posted a new update.
-      "${title}"
-      Check it out! https://pucallpa-2025.vercel.app/
-    `
-      return await sendSMSNotification(message, phone_number)
-    })
-  ).catch((error) => {
-    throw new Error('Failed to send SMS notifications', {
-      cause: error.message,
-    })
-  })
-}
 
 async function storePost(post: NewPost) {
   'use server'
@@ -128,7 +97,6 @@ async function submitPost(data: FormData) {
   }
 
   await storePost(post)
-  await sendNotification(post)
   revalidatePath('/', 'page')
   return redirect('/')
 }
