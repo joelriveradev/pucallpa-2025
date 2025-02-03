@@ -11,7 +11,7 @@ export default async function HomePage() {
 
   const { data: posts, error } = await db
     .from('posts')
-    .select('id, title, content, photo_urls, video_urls, created_at')
+    .select('id, title, content, photo_urls, created_at')
     .order('created_at', { ascending: false })
     .eq('stage', 'PUBLISHED')
 
@@ -27,14 +27,16 @@ export default async function HomePage() {
   }
 
   return (
-    <main className='w-full min-h-dvh px-10 py-20 lg:px-20 max-w-3xl mx-auto'>
-      <h1 className='text-xl lg:text-2xl font-bold mb-2'>
-        Pucallpa Mission 2025 🇵🇪
-      </h1>
+    <main className='w-full min-h-dvh py-10 lg:py-20 max-w-2xl mx-auto'>
+      <header className='px-5'>
+        <h1 className='text-xl lg:text-2xl font-bold mb-2'>
+          Pucallpa Mission 2025 🇵🇪
+        </h1>
 
-      <p className='text-muted-foreground'>
-        Sharing the love of Christ the people of Pucallpa.
-      </p>
+        <p className='text-muted-foreground'>
+          Sharing the love of Christ the people of Pucallpa.
+        </p>
+      </header>
 
       <div className='mt-20'>
         {posts.length === 0 ? (
@@ -43,55 +45,46 @@ export default async function HomePage() {
           </p>
         ) : null}
 
-        {posts.map(
-          ({ photo_urls, video_urls, content, created_at, id, title }) => {
-            return (
-              <Card
-                key={id}
-                className='p-5 bg-neutral-900/30 mb-7 pb-7 rounded-2xl'
-              >
-                <h2 className='font-semibold mb-1'>{title}</h2>
+        {posts.map(({ photo_urls, content, created_at, id, title }) => {
+          return (
+            <Card
+              key={id}
+              className='p-5 bg-neutral-900/30 mb-7 pb-7 rounded-2xl'
+            >
+              <header className='w-full md:flex lg:items-center md:justify-between mb-7'>
+                <h2 className='font-semibold'>{title}</h2>
 
-                <small className='mb-7 block text-neutral-300 font-mono'>
+                <small className='block text-neutral-300 font-mono'>
                   {formatDateCreated(created_at)}
                 </small>
+              </header>
 
-                {video_urls !== null && video_urls.length === 1 && (
-                  <video
-                    src={`${storageUrl}/${video_urls[0]}`}
-                    width={0}
-                    height={0}
-                    style={{ width: '100%', height: 'auto' }}
-                    className='rounded-xl mb-7'
-                    controls
-                  />
-                )}
+              {photo_urls !== null && photo_urls.length === 1 && (
+                <Image
+                  src={`${storageUrl}/${photo_urls[0]}`}
+                  width={0}
+                  height={0}
+                  sizes='100vw'
+                  style={{ width: '100%', height: 'auto' }}
+                  alt=''
+                  placeholder='blur'
+                  blurDataURL={`${storageUrl}/${photo_urls[0]}`}
+                  className='rounded-xl mb-7'
+                />
+              )}
 
-                {photo_urls !== null && photo_urls.length === 1 && (
-                  <Image
-                    src={`${storageUrl}/${photo_urls[0]}`}
-                    width={0}
-                    height={0}
-                    sizes='100vw'
-                    style={{ width: '100%', height: 'auto' }}
-                    alt=''
-                    className='rounded-xl mb-7'
-                  />
-                )}
+              {photo_urls !== null && photo_urls.length > 1 && (
+                <PhotoCarousel
+                  photos={photo_urls.map((url) => `${storageUrl}/${url}`)}
+                />
+              )}
 
-                {photo_urls !== null && photo_urls.length > 1 && (
-                  <PhotoCarousel
-                    photos={photo_urls.map((url) => `${storageUrl}/${url}`)}
-                  />
-                )}
-
-                <p className='antialised text-pretty text-neutral-300'>
-                  {content}
-                </p>
-              </Card>
-            )
-          }
-        )}
+              <p className='antialised text-pretty text-neutral-300'>
+                {content}
+              </p>
+            </Card>
+          )
+        })}
       </div>
     </main>
   )

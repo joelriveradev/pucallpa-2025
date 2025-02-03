@@ -17,6 +17,8 @@ import {
 
 import Link from 'next/link'
 
+export const maxDuration = 60
+
 async function storePost(post: NewPost) {
   'use server'
   const db = await createClient()
@@ -35,65 +37,30 @@ async function submitPost(data: FormData) {
   const post: NewPost = { title, content, stage }
 
   if (media.length > 0) {
-    const photos: File[] = []
-    const videos: File[] = []
-
     const photo_urls: string[] = []
-    const video_urls: string[] = []
 
-    media.forEach((file) => {
-      const { type } = file
-      if (type.includes('image')) photos.push(file)
-      if (type.includes('video')) videos.push(file)
+    const uploads = media.map(async (photo) => {
+      const filename = `photos/${photo.name}`
+
+      const { data, error } = await db.storage
+        .from('media')
+        .upload(filename, photo, {
+          cacheControl: '3600',
+          upsert: true,
+        })
+
+      if (error) {
+        console.error(error)
+        return null
+      }
+
+      return data?.fullPath
     })
 
-    if (photos.length > 0) {
-      const photoUploads = photos.map(async (photo) => {
-        const filename = `photos/${photo.name}`
+    const results = await Promise.all(uploads)
+    photo_urls.push(...results.filter((url) => url !== null))
 
-        const { data, error } = await db.storage
-          .from('media')
-          .upload(filename, photo, {
-            cacheControl: '3600',
-            upsert: true,
-          })
-
-        if (error) {
-          console.error(error)
-          return null
-        }
-
-        return data?.fullPath
-      })
-
-      const results = await Promise.all(photoUploads)
-      photo_urls.push(...results.filter((url) => url !== null))
-    }
-
-    if (videos.length > 0) {
-      const videoUploads = videos.map(async (video) => {
-        const filename = `videos/${video.name}`
-
-        const { data, error } = await db.storage
-          .from('media')
-          .upload(filename, video, {
-            cacheControl: '3600',
-            upsert: true,
-          })
-
-        if (error) {
-          console.error(error)
-          return null
-        }
-
-        return data?.fullPath
-      })
-
-      const results = await Promise.all(videoUploads)
-      video_urls.push(...results.filter((url) => url !== null))
-    }
-
-    await storePost({ ...post, video_urls, photo_urls })
+    await storePost({ ...post, photo_urls })
   }
 
   await storePost(post)

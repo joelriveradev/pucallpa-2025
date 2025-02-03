@@ -44,6 +44,8 @@ export function PhotoCarousel({ photos }: Props) {
                   height={0}
                   sizes='100vw'
                   style={{ width: '100%', height: 'auto' }}
+                  placeholder='blur'
+                  blurDataURL={url}
                   alt=''
                   className='rounded-xl mb-2'
                 />
