@@ -63,6 +63,8 @@ async function submitPost(data: FormData) {
       ...post,
       photo_urls: results.map(({ url }) => url),
       photo_captions: results.map((caption) => caption),
+    }).catch((error) => {
+      throw new Error('Failed to store post', { cause: error.message })
     })
   }
 
