@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { Card } from '@/components/ui/card'
 import { PhotoCarousel } from '@/components/photo-carousel'
 import { formatDateCreated } from '@/lib/utils'
+import { ScrollTop } from '@/components/scroll-top'
 
 import Image from 'next/image'
 
@@ -27,30 +28,24 @@ export default async function HomePage() {
   }
 
   return (
-    <main className='w-full min-h-dvh py-10 lg:py-20 max-w-2xl mx-auto'>
+    <main className='relative w-full min-h-dvh py-10 lg:py-20 max-w-2xl mx-auto'>
       <header className='px-5'>
-        <h1 className='text-xl lg:text-2xl font-bold mb-2'>
-          Pucallpa Mission 2025 🇵🇪
+        <h1 className='text-xl lg:text-2xl font-bold mb-0'>
+          Pucallpa Mission Trip 2025 🇵🇪
         </h1>
 
         <p className='text-muted-foreground'>
-          Sharing the love of Christ the people of Pucallpa.
+          Sharing the love of Christ to the people of Pucallpa.
         </p>
       </header>
 
-      <div className='mt-20'>
-        {posts.length === 0 ? (
-          <p className='text-muted-foreground'>
-            No posts to show yet. Check back later!
-          </p>
-        ) : null}
-
+      <div className='mt-[50px]'>
         {posts.map(
           ({ photo_urls, photo_captions, content, created_at, id, title }) => {
             return (
               <Card
                 key={id}
-                className='p-5 bg-neutral-900/30 mb-7 pb-7 rounded-2xl'
+                className='p-5 bg-neutral-900/30 mb-7 pb-7 rounded-3xl'
               >
                 <header className='w-full md:flex lg:items-center md:justify-between mb-7'>
                   <h2 className='font-semibold'>{title}</h2>
@@ -97,6 +92,8 @@ export default async function HomePage() {
           }
         )}
       </div>
+
+      <ScrollTop />
     </main>
   )
 }
