@@ -17,7 +17,7 @@ export function ScrollTop() {
     window.addEventListener('scroll', handleScroll)
 
     return () => window.removeEventListener('scroll', handleScroll)
-  })
+  }, [])
 
   function scroll() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -26,13 +26,12 @@ export function ScrollTop() {
   return (
     <Button
       className={cn(
-        'sticky bottom-5 left-1/2 transform -translate-x-1/2 rounded-full transition-all bg-white/70 backdrop-blur-md',
+        '!w-10 !h-10 sticky bottom-5 left-1/2 transform -translate-x-1/2 rounded-full transition-all bg-white/70 backdrop-blur-md',
         {
           'scale-0 opacity-0': isTop,
           'scale-100 opacity-100': !isTop,
         }
       )}
-      size='icon'
       onClick={scroll}
     >
       <ArrowUp />

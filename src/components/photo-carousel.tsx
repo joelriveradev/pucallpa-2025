@@ -29,7 +29,7 @@ export function PhotoCarousel({ photos }: Props) {
     api.on('select', () => {
       setCurrent(api.selectedScrollSnap() + 1)
     })
-  })
+  }, [api])
 
   return (
     <div className='w-full mb-7'>
