@@ -8,7 +8,10 @@ import { revalidatePath } from 'next/cache'
 
 export async function storePost(post: NewPost) {
   const db = await createClient()
-  await db.from('posts').insert(post)
+  await db
+    .from('posts')
+    .insert({ ...post, created_at: new Date().toISOString() })
+
   revalidatePath('/')
 }
 
