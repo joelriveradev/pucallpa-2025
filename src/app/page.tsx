@@ -73,9 +73,9 @@ export default async function HomePage() {
                     sizes='100vw'
                     style={{ width: '100%', height: 'auto' }}
                     alt={(photo_captions as any)![0].caption}
-                    placeholder='blur'
-                    blurDataURL={`${storageUrl}/${photo_urls[0]}`}
                     className='rounded-xl mb-7'
+                    priority
+                    quality={50}
                   />
                 )}
 
