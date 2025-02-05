@@ -20,6 +20,7 @@ export type Database = {
           stage: Database["public"]["Enums"]["stage"]
           title: string
           updated_at: string | null
+          video_urls: string[] | null
         }
         Insert: {
           content: string
@@ -31,6 +32,7 @@ export type Database = {
           stage?: Database["public"]["Enums"]["stage"]
           title: string
           updated_at?: string | null
+          video_urls?: string[] | null
         }
         Update: {
           content?: string
@@ -42,6 +44,7 @@ export type Database = {
           stage?: Database["public"]["Enums"]["stage"]
           title?: string
           updated_at?: string | null
+          video_urls?: string[] | null
         }
         Relationships: []
       }

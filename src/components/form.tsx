@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { startTransition, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 import {
@@ -38,8 +38,21 @@ export function Form() {
     const post: NewPost = { title, content, stage }
     const storage = process.env.NEXT_PUBLIC_SUPABASE_STORAGE_URL
 
-    if (media.length > 0) {
-      const uploads = media.map(async (photo) => {
+    const photos: File[] = []
+    const videos: File[] = []
+
+    await Promise.all(
+      media.map(async (file) => {
+        if (file.type.includes('image')) {
+          photos.push(file)
+          return
+        }
+        videos.push(file)
+      })
+    )
+
+    if (photos.length > 0) {
+      const photo_uploads = media.map(async (photo) => {
         const filename = `photos/${photo.name}`
 
         const { data } = await db.storage
@@ -59,7 +72,7 @@ export function Form() {
         }
       })
 
-      const results = await Promise.all(uploads)
+      const results = await Promise.all(photo_uploads)
 
       await storePost({
         ...post,
@@ -70,9 +83,37 @@ export function Form() {
       })
     }
 
-    await storePost(post)
-    setLoading(false)
-    router.push('/')
+    if (videos.length > 0) {
+      const video_uploads = media.map(async (video) => {
+        const filename = `videos/${video.name}`
+
+        const { data } = await db.storage
+          .from('media')
+          .upload(filename, video, {
+            cacheControl: '3600',
+            upsert: true,
+          })
+
+        return {
+          id: data?.id,
+          url: data?.fullPath ?? '',
+        }
+      })
+
+      const results = await Promise.all(video_uploads)
+
+      await storePost({
+        ...post,
+        video_urls: results.map(({ url }) => url),
+      }).catch((error) => {
+        throw new Error('Failed to store post', { cause: error.message })
+      })
+    }
+
+    startTransition(() => {
+      setLoading(false)
+      router.push('/')
+    })
   }
 
   return (

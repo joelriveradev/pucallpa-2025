@@ -12,7 +12,9 @@ export default async function HomePage() {
 
   const { data: posts, error } = await db
     .from('posts')
-    .select('id, title, content, photo_urls, photo_captions, created_at')
+    .select(
+      'id, title, content, photo_urls, photo_captions, video_urls, created_at'
+    )
     .order('created_at', { ascending: false })
     .eq('stage', 'PUBLISHED')
 
@@ -41,7 +43,15 @@ export default async function HomePage() {
 
       <div className='mt-[50px]'>
         {posts.map(
-          ({ photo_urls, photo_captions, content, created_at, id, title }) => {
+          ({
+            photo_urls,
+            video_urls,
+            photo_captions,
+            content,
+            created_at,
+            id,
+            title,
+          }) => {
             return (
               <Card
                 key={id}
@@ -81,6 +91,14 @@ export default async function HomePage() {
                         caption: caption.caption,
                       }
                     })}
+                  />
+                )}
+
+                {video_urls !== null && video_urls.length === 1 && (
+                  <video
+                    src={`${storageUrl}/${video_urls[0]}`}
+                    controls
+                    className='w-full h-auto rounded-xl mb-7'
                   />
                 )}
 
