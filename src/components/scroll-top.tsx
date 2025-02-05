@@ -26,7 +26,7 @@ export function ScrollTop() {
   return (
     <Button
       className={cn(
-        '!w-10 !h-10 sticky bottom-5 left-1/2 transform -translate-x-1/2 rounded-full transition-all bg-white/70 backdrop-blur-md',
+        '!w-10 !h-10 sticky bottom-7 left-1/2 transform -translate-x-1/2 rounded-full transition-all bg-white/70 backdrop-blur-md',
         {
           'scale-0 opacity-0': isTop,
           'scale-100 opacity-100': !isTop,
