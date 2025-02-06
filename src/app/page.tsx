@@ -3,6 +3,7 @@ import { Card } from '@/components/ui/card'
 import { PhotoCarousel } from '@/components/photo-carousel'
 import { formatDateCreated } from '@/lib/utils'
 import { ScrollTop } from '@/components/scroll-top'
+import { LikeButton } from '@/components/like-button'
 
 import Image from 'next/image'
 
@@ -13,7 +14,7 @@ export default async function HomePage() {
   const { data: posts, error } = await db
     .from('posts')
     .select(
-      'id, title, content, photo_urls, photo_captions, video_urls, created_at'
+      'id, title, content, likes(id), photo_urls, photo_captions, video_urls, created_at'
     )
     .order('created_at', { ascending: false })
     .eq('stage', 'PUBLISHED')
@@ -51,18 +52,23 @@ export default async function HomePage() {
             created_at,
             id,
             title,
+            likes,
           }) => {
             return (
               <Card
                 key={id}
                 className='p-5 bg-neutral-900/30 mb-7 pb-7 rounded-3xl'
               >
-                <header className='w-full md:flex lg:items-center md:justify-between mb-7'>
-                  <h2 className='font-semibold'>{title}</h2>
+                <header className='w-full flex items-start justify-between mb-7'>
+                  <div>
+                    <h2 className='font-semibold'>{title}</h2>
 
-                  <small className='block text-neutral-300 font-mono'>
-                    {formatDateCreated(created_at)}
-                  </small>
+                    <small className='block text-neutral-300 font-mono'>
+                      {formatDateCreated(created_at)}
+                    </small>
+                  </div>
+
+                  <LikeButton postId={id} likes={likes.length} />
                 </header>
 
                 {photo_urls !== null && photo_urls.length === 1 && (

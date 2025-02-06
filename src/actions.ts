@@ -72,3 +72,8 @@ export async function generateCaption(photoUrl: string) {
 
   return choices[0].message.content
 }
+
+export async function submitLike(postId: string) {
+  const db = await createClient()
+  await db.from('likes').insert({ post_id: postId })
+}
