@@ -45,7 +45,6 @@ export function PhotoCarousel({ photos, priority }: Props) {
                   height={0}
                   sizes='(max-width: 400px) 400px, (max-width: 800px) 800px, 1200px'
                   style={{ width: '100%', height: 'auto' }}
-                  layout='responsive'
                   priority={priority}
                   alt={caption}
                   className='rounded-xl mb-2'

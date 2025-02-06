@@ -1,15 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
-import { Card } from '@/components/ui/card'
-import { PhotoCarousel } from '@/components/photo-carousel'
-import { formatDateCreated } from '@/lib/utils'
 import { ScrollTop } from '@/components/scroll-top'
-import { LikeButton } from '@/components/like-button'
-
-import Image from 'next/image'
+import { DynamicFeed } from '@/components/dynamic-feed'
+import { PostWithLikes } from '@/lib/supabase/types/derived'
 
 export default async function HomePage() {
   const db = await createClient()
-  const storageUrl = process.env.NEXT_PUBLIC_SUPABASE_STORAGE_URL
 
   const { data: posts, error } = await db
     .from('posts')
@@ -18,6 +13,13 @@ export default async function HomePage() {
     )
     .order('created_at', { ascending: false })
     .eq('stage', 'PUBLISHED')
+    .limit(8)
+
+  const { data: count } = await db
+    .from('posts')
+    .select('count')
+    .eq('stage', 'PUBLISHED')
+    .single()
 
   if (error) {
     console.error(error.message)
@@ -42,85 +44,10 @@ export default async function HomePage() {
         </p>
       </header>
 
-      <div className='mt-[50px]'>
-        {posts.map(
-          (
-            {
-              photo_urls,
-              video_urls,
-              photo_captions,
-              content,
-              created_at,
-              id,
-              title,
-              likes,
-            },
-            index
-          ) => {
-            return (
-              <Card
-                key={id}
-                className='p-5 bg-neutral-900/30 mb-7 pb-7 rounded-3xl'
-              >
-                <header className='w-full flex items-start justify-between mb-7'>
-                  <div>
-                    <h2 className='font-semibold'>{title}</h2>
-
-                    <small className='block text-neutral-300 font-mono'>
-                      {formatDateCreated(created_at)}
-                    </small>
-                  </div>
-
-                  <LikeButton postId={id} likes={likes.length} />
-                </header>
-
-                {photo_urls !== null && photo_urls.length === 1 && (
-                  <Image
-                    src={`${storageUrl}/${photo_urls[0]}`}
-                    width={0}
-                    height={0}
-                    sizes='(max-width: 400px) 400px, (max-width: 800px) 800px, 1200px'
-                    layout='responsive'
-                    style={{ width: '100%', height: 'auto' }}
-                    alt={(photo_captions as any)![0].caption}
-                    className='rounded-xl mb-7'
-                    priority={index <= 3}
-                    quality={50}
-                  />
-                )}
-
-                {photo_urls !== null && photo_urls.length > 1 && (
-                  <PhotoCarousel
-                    priority={index <= 3}
-                    photos={photo_urls.map((url) => {
-                      const caption: any = photo_captions!.find(
-                        (caption: any) => caption.url === url
-                      )
-
-                      return {
-                        url: `${storageUrl}/${url}`,
-                        caption: caption.caption,
-                      }
-                    })}
-                  />
-                )}
-
-                {video_urls !== null && video_urls.length === 1 && (
-                  <video
-                    src={`${storageUrl}/${video_urls[0]}`}
-                    controls
-                    className='w-full h-auto rounded-xl mb-7'
-                  />
-                )}
-
-                <p className='antialised text-pretty text-neutral-300'>
-                  {content}
-                </p>
-              </Card>
-            )
-          }
-        )}
-      </div>
+      <DynamicFeed
+        posts={posts as PostWithLikes[]}
+        count={count?.count as number}
+      />
 
       <ScrollTop />
     </main>
