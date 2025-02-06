@@ -76,7 +76,8 @@ export default async function HomePage() {
                     src={`${storageUrl}/${photo_urls[0]}`}
                     width={0}
                     height={0}
-                    sizes='100vw'
+                    sizes='(max-width: 400px) 400px, (max-width: 800px) 800px, 1200px'
+                    layout='responsive'
                     style={{ width: '100%', height: 'auto' }}
                     alt={(photo_captions as any)![0].caption}
                     className='rounded-xl mb-7'

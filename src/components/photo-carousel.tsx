@@ -42,8 +42,9 @@ export function PhotoCarousel({ photos }: Props) {
                   src={url}
                   width={0}
                   height={0}
-                  sizes='100vw'
+                  sizes='(max-width: 400px) 400px, (max-width: 800px) 800px, 1200px'
                   style={{ width: '100%', height: 'auto' }}
+                  layout='responsive'
                   placeholder='blur'
                   blurDataURL={url}
                   alt={caption}
