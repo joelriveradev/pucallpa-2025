@@ -12,10 +12,11 @@ import {
 import Image from 'next/image'
 
 interface Props {
+  priority?: boolean
   photos: Array<{ url: string; caption: string }>
 }
 
-export function PhotoCarousel({ photos }: Props) {
+export function PhotoCarousel({ photos, priority }: Props) {
   const [current, setCurrent] = useState(0)
   const [count, setCount] = useState(0)
   const [api, setApi] = useState<CarouselApi>()
@@ -45,8 +46,7 @@ export function PhotoCarousel({ photos }: Props) {
                   sizes='(max-width: 400px) 400px, (max-width: 800px) 800px, 1200px'
                   style={{ width: '100%', height: 'auto' }}
                   layout='responsive'
-                  placeholder='blur'
-                  blurDataURL={url}
+                  priority={priority}
                   alt={caption}
                   className='rounded-xl mb-2'
                 />

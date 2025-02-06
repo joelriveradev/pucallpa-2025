@@ -44,16 +44,19 @@ export default async function HomePage() {
 
       <div className='mt-[50px]'>
         {posts.map(
-          ({
-            photo_urls,
-            video_urls,
-            photo_captions,
-            content,
-            created_at,
-            id,
-            title,
-            likes,
-          }) => {
+          (
+            {
+              photo_urls,
+              video_urls,
+              photo_captions,
+              content,
+              created_at,
+              id,
+              title,
+              likes,
+            },
+            index
+          ) => {
             return (
               <Card
                 key={id}
@@ -81,13 +84,14 @@ export default async function HomePage() {
                     style={{ width: '100%', height: 'auto' }}
                     alt={(photo_captions as any)![0].caption}
                     className='rounded-xl mb-7'
-                    priority
+                    priority={index <= 3}
                     quality={50}
                   />
                 )}
 
                 {photo_urls !== null && photo_urls.length > 1 && (
                   <PhotoCarousel
+                    priority={index <= 3}
                     photos={photo_urls.map((url) => {
                       const caption: any = photo_captions!.find(
                         (caption: any) => caption.url === url
