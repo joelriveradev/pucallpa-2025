@@ -1,19 +1,19 @@
 import { createClient } from '@/lib/supabase/server'
-import { ScrollTop } from '@/components/scroll-top'
 import { DynamicFeed } from '@/components/dynamic-feed'
 import { PostWithLikes } from '@/lib/supabase/types/derived'
 
 export default async function HomePage() {
   const db = await createClient()
+  const limit = Number(process.env.FEED_LIMIT!)
 
   const { data: posts, error } = await db
     .from('posts')
     .select(
-      'id, title, content, likes(id), photo_urls, photo_captions, video_urls, created_at'
+      'id, title, content, likes(id), photo_urls, photo_captions, created_at'
     )
     .order('created_at', { ascending: false })
     .eq('stage', 'PUBLISHED')
-    .limit(8)
+    .limit(limit)
 
   const { data: count } = await db
     .from('posts')
@@ -33,7 +33,7 @@ export default async function HomePage() {
   }
 
   return (
-    <main className='relative w-full min-h-dvh py-10 lg:py-20 max-w-2xl mx-auto'>
+    <main className='w-full min-h-dvh py-10'>
       <header className='px-5'>
         <h1 className='text-xl lg:text-2xl font-bold mb-0'>
           Pucallpa Mission Trip 2025 🇵🇪
@@ -45,11 +45,10 @@ export default async function HomePage() {
       </header>
 
       <DynamicFeed
+        limit={limit}
         posts={posts as PostWithLikes[]}
         count={count?.count as number}
       />
-
-      <ScrollTop />
     </main>
   )
 }

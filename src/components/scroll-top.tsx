@@ -1,11 +1,13 @@
 'use client'
 
-import { useState, useEffect, useTransition } from 'react'
+import { useState, useEffect, useTransition, useCallback } from 'react'
 import { ArrowUp } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
-export function ScrollTop() {
+interface Props {}
+
+export function ScrollTop({}: Props) {
   const [_, startTransition] = useTransition()
   const [isTop, setIsTop] = useState(true)
 
@@ -19,14 +21,17 @@ export function ScrollTop() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  function scroll() {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
+  const scroll = useCallback(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    })
+  }, [])
 
   return (
     <Button
       className={cn(
-        '!w-10 !h-10 sticky bottom-7 left-1/2 transform -translate-x-1/2 rounded-full transition-all bg-white/70 backdrop-blur-md',
+        '!w-14 !h-14 sticky bottom-7 left-1/2 transform -translate-x-1/2 rounded-full transition-all bg-white/70 backdrop-blur-md',
         {
           'scale-0 opacity-0': isTop,
           'scale-100 opacity-100': !isTop,
@@ -34,7 +39,7 @@ export function ScrollTop() {
       )}
       onClick={scroll}
     >
-      <ArrowUp />
+      <ArrowUp size={24} />
     </Button>
   )
 }

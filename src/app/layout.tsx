@@ -1,7 +1,17 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { cn } from '@/lib/utils'
+import { Info } from 'lucide-react'
 
+import { Separator } from '@radix-ui/react-select'
+
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+
+import Link from 'next/link'
 import './globals.css'
 
 const inter = Inter({
@@ -35,7 +45,17 @@ export default function Layout({ children }: Props) {
         inter.variable
       )}
     >
-      <body>{children}</body>
+      <body>
+        <div className='w-full max-w-2xl mx-auto'>
+          <nav className='p-4'>
+            <Link href='/about' prefetch className='text-muted-foreground'>
+              <Info size={22} />
+            </Link>
+          </nav>
+
+          {children}
+        </div>
+      </body>
     </html>
   )
 }

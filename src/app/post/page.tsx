@@ -5,7 +5,7 @@ import Link from 'next/link'
 
 export default async function PostPage() {
   return (
-    <div className='w-full min-h-dvh p-8 lg:p-10'>
+    <div className='w-full min-h-dvh p-4'>
       <main className='max-w-3xl mx-auto'>
         <header className='flex items-center justify-between mb-5'>
           <h1 className='font-bold'>Post</h1>

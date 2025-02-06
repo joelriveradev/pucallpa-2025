@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useTransition } from 'react'
 import { Card } from '@/components/ui/card'
+import { ScrollTop } from '@/components/scroll-top'
 import { PhotoCarousel } from '@/components/photo-carousel'
 import { formatDateCreated } from '@/lib/utils'
 import { PostWithLikes } from '@/lib/supabase/types/derived'
@@ -11,11 +12,14 @@ import { createClient } from '@/lib/supabase/client'
 import Image from 'next/image'
 
 interface Props {
+  limit: number
   count: number
   posts: PostWithLikes[]
 }
 
-export function DynamicFeed({ posts: initialPosts, count }: Props) {
+export function DynamicFeed({ posts: initialPosts, limit }: Props) {
+  const db = createClient()
+
   const [currentPage, setCurrentPage] = useState(1)
   const [posts, setPosts] = useState(initialPosts)
   const [isBottom, setIsBottom] = useState(false)
@@ -24,8 +28,6 @@ export function DynamicFeed({ posts: initialPosts, count }: Props) {
   const storageUrl = process.env.NEXT_PUBLIC_SUPABASE_STORAGE_URL
 
   async function fetchPosts() {
-    const db = createClient()
-    const limit = 8
     const from = currentPage * limit
     const to = from + limit - 1
 
@@ -48,18 +50,23 @@ export function DynamicFeed({ posts: initialPosts, count }: Props) {
 
   useEffect(() => {
     if (isBottom) {
-      startTransition(async () => {
-        await fetchPosts()
-      })
+      startTransition(async () => await fetchPosts())
     }
   }, [isBottom])
 
   useEffect(() => {
     function handleScroll() {
+      const offset = 1000
+
       const scrollTop = document.documentElement.scrollTop
       const scrollHeight = document.documentElement.scrollHeight
       const clientHeight = document.documentElement.clientHeight
-      setIsBottom(scrollTop + clientHeight >= scrollHeight ? true : false)
+
+      startTransition(() => {
+        setIsBottom(
+          scrollTop + clientHeight + offset >= scrollHeight ? true : false
+        )
+      })
     }
 
     window.addEventListener('scroll', handleScroll)
@@ -68,19 +75,10 @@ export function DynamicFeed({ posts: initialPosts, count }: Props) {
   }, [])
 
   return (
-    <div className='w-full mt-[50px]'>
+    <div className='relative w-full mt-12'>
       {posts.map(
         (
-          {
-            photo_urls,
-            video_urls,
-            photo_captions,
-            content,
-            created_at,
-            id,
-            title,
-            likes,
-          },
+          { photo_urls, photo_captions, content, created_at, id, title, likes },
           index
         ) => {
           return (
@@ -130,14 +128,6 @@ export function DynamicFeed({ posts: initialPosts, count }: Props) {
                 />
               )}
 
-              {video_urls !== null && video_urls.length === 1 && (
-                <video
-                  src={`${storageUrl}/${video_urls[0]}`}
-                  controls
-                  className='w-full h-auto rounded-xl mb-7'
-                />
-              )}
-
               <p className='antialised text-pretty text-neutral-300'>
                 {content}
               </p>
@@ -145,6 +135,8 @@ export function DynamicFeed({ posts: initialPosts, count }: Props) {
           )
         }
       )}
+
+      <ScrollTop />
     </div>
   )
 }
