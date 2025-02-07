@@ -56,7 +56,7 @@ export function DynamicFeed({ posts: initialPosts, limit }: Props) {
 
   useEffect(() => {
     function handleScroll() {
-      const offset = 1000
+      const offset = 500
 
       const scrollTop = document.documentElement.scrollTop
       const scrollHeight = document.documentElement.scrollHeight
